@@ -1,6 +1,7 @@
 FROM ubuntu:latest
 
 RUN apt-get update && apt-get install -y libglu1-mesa firefox
+RUN apt-get install -y iputils-ping inetutils-traceroute net-tools
 
 # Replace 1000 with your user / group id
 RUN export uid=1000 gid=1000 && \
