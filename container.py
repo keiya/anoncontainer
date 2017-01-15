@@ -4,34 +4,38 @@ import os
 import subprocess
 import threading
 import uuid
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 class DockerRunner(threading.Thread):
-    def __init__(self,image_name,command):
+    def __init__(self, image_name, command):
         threading.Thread.__init__(self)
         self.container_name = 'apsis-' + str(uuid.uuid4())
         self.image_name = image_name
         self.command = command.split(' ')
 
     def run(self):
-        if 'DISPLAY' in os.environ:
-          x_display = os.environ['DISPLAY']
-          rc = subprocess.call( ['docker', 'run', '-ti', '--rm', '--name', self.container_name,
-                     '-e', 'DISPLAY='+x_display, '-v', '/tmp/.X11-unix:/tmp/.X11-unix',
-                     '--net=none',
-                     self.image_name] + self.command )
-        else:
-          rc = subprocess.call( ['docker', 'run', '-ti', '--rm', '--name', self.container_name,
-                     '--net=none',
-                     self.image_name] + self.command )
+      if 'DISPLAY' in os.environ:
+        x_display = os.environ['DISPLAY']
+        rc = subprocess.call( ['docker', 'run', '-ti', '--rm', '--name', self.container_name,
+                   '-e', 'DISPLAY='+x_display, '-v', '/tmp/.X11-unix:/tmp/.X11-unix',
+                   '--net=none',
+                   self.image_name] + self.command )
+      else:
+        rc = subprocess.call( ['docker', 'run', '-ti', '--rm', '--name', self.container_name,
+                   '--net=none',
+                   self.image_name] + self.command )
+
 
 class NetworkConfigurator():
     def __init__(self,container_name):
         self.ctr = None
         self.shell_env = os.environ.copy()
         self.container_name = container_name
+        self.path = os.path.dirname(os.path.abspath(__file__))
 
     def __enter__(self):
-        c = docker.Client()
+        c = docker.APIClient()
         timeout = 0
         while not self.ctr:
             try:
@@ -49,11 +53,11 @@ class NetworkConfigurator():
             timeout += 1
 
         self.shell_env["apsis_sandboxed_pid"] = str(self.ctr["State"]["Pid"])
-        rc = subprocess.call( ['bash','container-net-up.sh'], env=self.shell_env )
+        rc = subprocess.call( ['bash', self.path + '/container-net-up.sh'], env=self.shell_env )
 
     def __exit__(self, exc_type, exc_value, traceback):
         print("executing net-down")
         self.shell_env["apsis_sandboxed_pid"] = str(self.ctr["State"]["Pid"])
-        rc = subprocess.call( ['bash','container-net-down.sh'], env=self.shell_env )
+        rc = subprocess.call( ['bash', self.path + '/container-net-down.sh'], env=self.shell_env )
 
 
