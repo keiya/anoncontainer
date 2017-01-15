@@ -2,7 +2,8 @@ import container
 
 class Apsis():
     def __init__(self):
-        self.dr = container.DockerRunner("firefox","firefox")
+        #self.dr = container.DockerRunner("busybox","wget -O - --no-check-certificate https://130.158.64.1/~s1011420/env.php")
+        self.dr = container.DockerRunner("busybox","/bin/sh")
 
     def run(self):
         self.dr.start()

@@ -13,12 +13,17 @@ class DockerRunner(threading.Thread):
         self.command = command.split(' ')
 
     def run(self):
-        x_display = os.environ['DISPLAY']
-        rc = subprocess.call( ['docker', 'run', '-ti', '--rm', '--name', self.container_name,
-                   '-e', 'DISPLAY='+x_display, '-v', '/tmp/.X11-unix:/tmp/.X11-unix',
-                   '--net=none',
-                   self.image_name] + self.command )
-    
+        if 'DISPLAY' in os.environ:
+          x_display = os.environ['DISPLAY']
+          rc = subprocess.call( ['docker', 'run', '-ti', '--rm', '--name', self.container_name,
+                     '-e', 'DISPLAY='+x_display, '-v', '/tmp/.X11-unix:/tmp/.X11-unix',
+                     '--net=none',
+                     self.image_name] + self.command )
+        else:
+          rc = subprocess.call( ['docker', 'run', '-ti', '--rm', '--name', self.container_name,
+                     '--net=none',
+                     self.image_name] + self.command )
+
 class NetworkConfigurator():
     def __init__(self,container_name):
         self.ctr = None
