@@ -4,8 +4,6 @@ import os
 import subprocess
 import threading
 import uuid
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
 
 class DockerRunner(threading.Thread):
     def __init__(self, image_name, command):
