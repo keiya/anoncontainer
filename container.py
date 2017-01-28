@@ -21,7 +21,7 @@ class DockerRunner(threading.Thread):
                    self.image_name] + self.command )
       else:
         rc = subprocess.call( ['docker', 'run', '-ti', '--rm', '--name', self.container_name,
-                   '--net=none',
+                   '--net=none', '--dns=8.8.8.8',
                    self.image_name] + self.command )
 
 
